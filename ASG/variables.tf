@@ -1,3 +1,13 @@
+####Credentials###
+
+variable "INSERT_DELEGATED_ACCOUNT_ID" {
+  type        = string
+}
+
+variable "INSERT_ASSUME_ROLE_NAME" {
+  type        = string
+}
+
 variable "region" {
   type        = string
 }

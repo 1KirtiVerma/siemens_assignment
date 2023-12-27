@@ -1,3 +1,77 @@
+data "aws_vpc" "vpc" {
+filter {
+    name   = "Environment"
+    values = ["dev"]
+  }
+}
+
+data "aws_subnet" "public_subnet" {
+filter {
+    name   = "Environment"
+    values = ["dev"]
+  }
+}
+
+data "aws_subnet" "private_subnet" {
+filter {
+    name   = "Environment"
+    values = ["dev"]
+  }
+}
+
+# Load Balancer Security Group 
+
+resource "aws_security_group" "loadbalancer-sg" { 
+    name = "loadbalancer-sg" 
+    description = "Security group for the load balancer" 
+    ingress { 
+        from_port = 80 
+        to_port = 80 
+        protocol = "tcp" 
+        cidr_blocks = ["0.0.0.0/0"] 
+        } 
+        
+        ingress { 
+            from_port = 443 
+            to_port = 443 
+            protocol = "tcp" 
+            cidr_blocks = ["0.0.0.0/0"] 
+            } 
+            
+        egress { 
+            from_port = 0 
+            to_port = 0 
+            protocol = "-1" 
+            cidr_blocks = ["0.0.0.0/0"] 
+            } 
+            } 
+            # Instance Security Group 
+            resource "aws_security_group" "instance-sg" { 
+                name = "instance-sg" 
+                description = "Security group for instances" 
+                ingress { 
+                    from_port = 80 
+                    to_port = 80 
+                    protocol = "tcp" 
+                    security_groups = [aws_security_group.loadbalancer-sg.id] 
+                    } 
+                    
+                ingress { 
+                    from_port = 443 
+                    to_port = 443 
+                    protocol = "tcp" 
+                    security_groups = [aws_security_group.loadbalancer-sg.id] 
+                    } 
+                    
+                    # Add any additional ports for management purposes... 
+                egress { 
+                    from_port = 0 
+                    to_port = 0 
+                    protocol = "-1" 
+                    cidr_blocks = ["0.0.0.0/0"] 
+                    } 
+                } 
+
 data "aws_ami" "amazon_linux" {
   most_recent = true
   filter {
@@ -36,6 +110,7 @@ resource "aws_launch_template" "webservers" {
 }
 resource "aws_autoscaling_group" "webservers" {
   availability_zones = var.availability_zones
+  vpc_zone_identifier = data.aws_subnet.private_subnet.id
   desired_capacity   = 1
   max_size           = 3
   min_size           = 1
@@ -51,6 +126,8 @@ resource "aws_autoscaling_group" "webservers" {
 resource "aws_elb" "webservers_loadbalancer" {
   name               = var.name
   availability_zones = var.availability_zones
+  security_groups = [aws_security_group.loadbalancer-sg.id] 
+  subnets = data.aws_subnet.public_subnet.id  # Need to add data source
 
   listener {
     instance_port     = 8080
