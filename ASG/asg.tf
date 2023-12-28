@@ -89,6 +89,7 @@ data "aws_ami" "amazon_linux" {
 resource "aws_launch_template" "webservers" {
   name_prefix   = var.name_prefix
   image_id      = data.aws_ami.amazon_linux.id
+  user_data_base64  = base64encode(data.local_file.user_data.rendered)
   instance_type = var.instance_type
 ########### POINT 6 The instance in the ASG Must contain both a root volume to store the application / services and must contain a secondary volume meant to store any log data bound from / var/log
 
@@ -156,4 +157,11 @@ resource "aws_elb" "webservers_loadbalancer" {
     target              = "HTTP:8080/"
     interval            = 30
   }
+}
+
+######## User DATA #########
+####POINT 7  all requirements in this task of configuring the operating system should be defined in the launch configuration and/or the user data script
+
+data "local_file" "user_data" {
+  filename = "../userdata.tpl"
 }
