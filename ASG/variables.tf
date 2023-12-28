@@ -1,21 +1,22 @@
 ####Credentials###
 
 variable "INSERT_DELEGATED_ACCOUNT_ID" {
-  type        = string
+  type = string
 }
 
 variable "INSERT_ASSUME_ROLE_NAME" {
-  type        = string
+  type = string
 }
 
+
 variable "region" {
-  type        = string
+  type = string
 }
-variable "name_prefix" { }
+variable "name_prefix" {}
 variable "instance_type" {}
 variable "availability_zones" {
-  
+
 }
 variable "name" {
-  
+
 }

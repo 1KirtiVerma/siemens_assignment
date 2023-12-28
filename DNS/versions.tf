@@ -10,8 +10,8 @@ terraform {
 }
 
 provider "aws" {
-  region = var.region
-  assume_role {
+  region  = var.region
+   assume_role {
     role_arn = "arn:aws:iam::${var.INSERT_DELEGATED_ACCOUNT_ID}:role/${var.INSERT_ASSUME_ROLE_NAME}"
-  }
+    }
 }
